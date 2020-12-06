@@ -1,0 +1,32 @@
+{
+  "name": "ir-bridge",
+  "version": "1.0.0",
+  "description": "Manage state of infrared devices. Using itach, broadlink rm or similar devices.",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tillbaks/node-ir-bridge.git"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "ir",
+    "infrared",
+    "itach",
+    "broadlink",
+    "homeassistant",
+    "home-assistant",
+    "bridge",
+    "manager",
+    "manage"
+  ],
+  "author": "tillbaks",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tillbaks/node-ir-bridge/issues"
+  },
+  "homepage": "https://github.com/tillbaks/node-ir-bridge#readme"
+}
