@@ -86,7 +86,8 @@ export default async ({ setState, getState }) => {
     updateState("input", input);
   }
 
-  async function setVolume(level) {
+  async function setVolume(newLevel) {
+    const level = parseInt(newLevel)
     if (level < config.volume.min || level > config.volume.max)
       return { error: "Volume level out of range" };
     let current =
@@ -115,7 +116,8 @@ export default async ({ setState, getState }) => {
     await setVolume(config.volume.initial);
   }
 
-  async function setBass(level) {
+  async function setBass(newLevel) {
+    const level = parseInt(newLevel)
     if (level < config.tone.min || level > config.tone.max)
       return { error: "Bass level out of range" };
     let current =
@@ -160,7 +162,8 @@ export default async ({ setState, getState }) => {
     await setBass(config.tone.initial);
   }
 
-  async function setTreble(level) {
+  async function setTreble(newLevel) {
+    const level = parseInt(newLevel)
     if (level < config.tone.min || level > config.tone.max)
       return { error: "Treble level out of range" };
     let current =
@@ -214,17 +217,19 @@ export default async ({ setState, getState }) => {
   }
 
   return {
-    device,
+    DEVICE_ID: device,
     commands: {
       powerToggle: () => itach.send(buttons.power),
       nextInput: () => itach.send(buttons.input),
       setBass,
       setTreble,
       setInput,
+      setVolume,
       resetVolume,
       resetBass,
       resetTreble,
       resetAll,
+      getState: () => getState({ device }),
     },
   };
 };

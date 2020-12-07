@@ -1,8 +1,11 @@
-import smslq5pro from "./devices/SMSL_Q5_PRO.js";
+import AwaitLock from "await-lock";
 import config from "../config.js";
 import NeDB from "nedb";
 import mqtt from "mqtt";
+
+const lock = new AwaitLock.default();
 const state = new NeDB({ filename: "state.nedb", autoload: true });
+const APP_ID = "irbridge";
 
 function getState({ device, key }) {
   return new Promise((resolve, reject) => {
@@ -16,7 +19,6 @@ function getState({ device, key }) {
             return acc;
           }, {})
         );
-        console.log({docs})
     });
   });
 }
@@ -25,32 +27,71 @@ function setState({ device, key, value }) {
   state.update(
     { device, key },
     { $set: { value } },
-    {
-      upsert: true,
-    },
+    { upsert: true },
     (err, numAffected, affectedDocuments, upsert) => {
-      console.log("setState result:", {
-        device,
-        key,
-        value,
-        err,
-        numAffected,
-        affectedDocuments,
-        upsert,
-      });
+      if (err) {
+        console.error("Error (setState):", {
+          err,
+          device,
+          key,
+          value,
+          numAffected,
+          affectedDocuments,
+          upsert,
+        });
+      }
     }
   );
 }
 
-const device_SMSL_Q5_PRO = await smslq5pro({ setState, getState });
-  
+const deviceList = await Promise.all(
+  config.devices.map(async (device) =>
+    (await device).default({ setState, getState })
+  )
+);
+const devices = {};
+deviceList.forEach((device) => {
+  devices[device.DEVICE_ID] = device;
+});
+
 const client = mqtt.connect(config.mqtt.host, config.mqtt.options);
 
 client.on("connect", async function () {
   console.log("MQTT Connected");
-  const state = await getState({ device: device_SMSL_Q5_PRO.device });
-  console.log({ state });
-  client.publish("irbridge/smslq5pro/state", JSON.stringify(state), {
-    retain: true,
+
+  client.on("message", async (topic, payload) => {
+    await lock.acquireAsync();
+    try {
+      const [appId, deviceId, command] = topic.split("/");
+      console.debug("Executing:", {
+        appId,
+        deviceId,
+        command,
+        payload: payload.toString(),
+      });
+      await devices[deviceId].commands[command](payload);
+
+      const state = await getState({ device: deviceId });
+
+      client.publish(
+        `${APP_ID}/${deviceId}/state`,
+        JSON.stringify(state),
+        {
+          retain: true,
+        }
+      );
+    } finally {
+      lock.release();
+    }
+  });
+
+  deviceList.forEach(async (device) => {
+    client.subscribe(
+      Object.keys(device.commands).map(
+        (command) => `${APP_ID}/${device.DEVICE_ID}/${command}`
+      ),
+      {},
+      console.log
+    );
   });
 });
