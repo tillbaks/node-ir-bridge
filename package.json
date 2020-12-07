@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "ir-bridge",
   "version": "1.0.0",
   "description": "Manage state of infrared devices. Using itach, broadlink rm or similar devices.",
@@ -28,5 +29,10 @@
   "bugs": {
     "url": "https://github.com/tillbaks/node-ir-bridge/issues"
   },
-  "homepage": "https://github.com/tillbaks/node-ir-bridge#readme"
+  "homepage": "https://github.com/tillbaks/node-ir-bridge#readme",
+  "dependencies": {
+    "itach": "^2.0.0",
+    "mqtt": "^4.2.6",
+    "nedb": "^1.8.0"
+  }
 }
