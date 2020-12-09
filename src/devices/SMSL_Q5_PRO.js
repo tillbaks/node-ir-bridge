@@ -18,6 +18,7 @@ const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 
 export default async ({ setState, getState }) => {
   const device = "SMSL Q5 PRO";
+  let isConnected = false;
   const config = {
     itach: {
       host: "192.168.1.25",
@@ -46,12 +47,18 @@ export default async ({ setState, getState }) => {
   };
 
   const buttons = {
-    power: "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,65,22,65,22,65,22,65,22,65,22,1657",
-    up: "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,65,22,65,22,65,22,65,22,1657",
-    down: "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,22,22,65,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,22,22,65,22,65,22,65,22,65,22,65,22,1657",
-    mute: "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,22,22,65,22,65,22,65,22,65,22,65,22,1657",
-    tone: "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,22,22,65,22,65,22,65,22,65,22,65,22,1657",
-    source: "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,65,22,65,22,65,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,65,22,65,22,65,22,1657",
+    power:
+      "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,65,22,65,22,65,22,65,22,65,22,1657",
+    up:
+      "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,65,22,65,22,65,22,65,22,1657",
+    down:
+      "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,22,22,65,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,22,22,65,22,65,22,65,22,65,22,65,22,1657",
+    mute:
+      "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,22,22,65,22,65,22,65,22,65,22,65,22,1657",
+    tone:
+      "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,22,22,65,22,65,22,65,22,65,22,65,22,1657",
+    source:
+      "sendir,1:1,1,38400,1,1,347,173,22,22,22,65,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,65,22,65,22,22,22,22,22,65,22,65,22,65,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,65,22,65,22,65,22,1657",
   };
 
   async function updateState({ key, value, min, max }) {
@@ -67,6 +74,7 @@ export default async ({ setState, getState }) => {
   itach.connect(config.itach);
 
   itach.on("connect", async () => {
+    isConnected = true;
     console.log("itach connected");
     //await resetAll();
 
@@ -78,10 +86,17 @@ export default async ({ setState, getState }) => {
     //await setTreble(6)
   });
 
+  itach.on("close", () => {
+    isConnected = false;
+  });
+
   async function setSource(source) {
+    if (!isConnected) return { error: "Not connected" };
     const wanted = config.source.possible.indexOf(source) + 1;
     if (wanted === 0) return { error: "Invalid source provided." };
-    let currentSource = (await getState({ device, key: "source" }))?.source || config.source.initial;
+    let currentSource =
+      (await getState({ device, key: "source" }))?.source ||
+      config.source.initial;
 
     const current = config.source.possible.indexOf(currentSource) + 1;
 
@@ -101,9 +116,12 @@ export default async ({ setState, getState }) => {
   }
 
   async function volumeUp(steps = 1) {
+    if (!isConnected) return { error: "Not connected" };
     if (steps < 1 || steps > config.volume.max) return;
 
-    let current = (await getState({ device, key: "volume" }))?.volume || config.volume.initial;
+    let current =
+      (await getState({ device, key: "volume" }))?.volume ||
+      config.volume.initial;
 
     try {
       for (let i = 0; i < parseInt(steps); i++) {
@@ -111,14 +129,22 @@ export default async ({ setState, getState }) => {
         current++;
       }
     } finally {
-      updateState({ key: "volume", value: current, min: config.volume.min, max: config.volume.max });
+      updateState({
+        key: "volume",
+        value: current,
+        min: config.volume.min,
+        max: config.volume.max,
+      });
     }
   }
 
   async function volumeDown(steps = 1) {
+    if (!isConnected) return { error: "Not connected" };
     if (steps < 1 || steps > config.volume.max) return;
 
-    let current = (await getState({ device, key: "volume" }))?.volume || config.volume.initial;
+    let current =
+      (await getState({ device, key: "volume" }))?.volume ||
+      config.volume.initial;
 
     try {
       for (let i = 0; i < parseInt(steps); i++) {
@@ -126,14 +152,23 @@ export default async ({ setState, getState }) => {
         current--;
       }
     } finally {
-      updateState({ key: "volume", value: current, min: config.volume.min, max: config.volume.max });
+      updateState({
+        key: "volume",
+        value: current,
+        min: config.volume.min,
+        max: config.volume.max,
+      });
     }
   }
 
   async function setVolume(newLevel) {
+    if (!isConnected) return { error: "Not connected" };
     const level = parseInt(newLevel);
-    if (level < config.volume.min || level > config.volume.max) return { error: "Volume level out of range" };
-    let current = (await getState({ device, key: "volume" }))?.volume || config.volume.initial;
+    if (level < config.volume.min || level > config.volume.max)
+      return { error: "Volume level out of range" };
+    let current =
+      (await getState({ device, key: "volume" }))?.volume ||
+      config.volume.initial;
     if (level === current) return { error: "Volume is already " + level };
     const increaseVolume = level > current;
 
@@ -145,14 +180,18 @@ export default async ({ setState, getState }) => {
   }
 
   async function resetVolume() {
+    if (!isConnected) return { error: "Not connected" };
     await volumeDown(config.volume.max);
     await setVolume(config.volume.initial);
   }
 
   async function bassUp(steps = 1) {
-    if (steps < 1 || steps > Math.abs(config.tone.min) + config.tone.max) return;
+    if (!isConnected) return { error: "Not connected" };
+    if (steps < 1 || steps > Math.abs(config.tone.min) + config.tone.max)
+      return;
 
-    let current = (await getState({ device, key: "bass" }))?.bass || config.tone.initial;
+    let current =
+      (await getState({ device, key: "bass" }))?.bass || config.tone.initial;
 
     try {
       await itach.send(buttons.tone);
@@ -169,7 +208,12 @@ export default async ({ setState, getState }) => {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
 
-      updateState({ key: "bass", value: current, min: config.tone.min, max: config.tone.max });
+      updateState({
+        key: "bass",
+        value: current,
+        min: config.tone.min,
+        max: config.tone.max,
+      });
     } catch (error) {
       await sleep(config.tone.failDelay);
       await resetBass();
@@ -177,9 +221,12 @@ export default async ({ setState, getState }) => {
   }
 
   async function bassDown(steps = 1) {
-    if (steps < 1 || steps > Math.abs(config.tone.min) + config.tone.max) return;
+    if (!isConnected) return { error: "Not connected" };
+    if (steps < 1 || steps > Math.abs(config.tone.min) + config.tone.max)
+      return;
 
-    let current = (await getState({ device, key: "bass" }))?.bass || config.tone.initial;
+    let current =
+      (await getState({ device, key: "bass" }))?.bass || config.tone.initial;
 
     try {
       await itach.send(buttons.tone);
@@ -196,7 +243,12 @@ export default async ({ setState, getState }) => {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
 
-      updateState({ key: "bass", value: current, min: config.tone.min, max: config.tone.max });
+      updateState({
+        key: "bass",
+        value: current,
+        min: config.tone.min,
+        max: config.tone.max,
+      });
     } catch (error) {
       await sleep(config.tone.failDelay);
       await resetBass();
@@ -204,9 +256,12 @@ export default async ({ setState, getState }) => {
   }
 
   async function setBass(newLevel) {
+    if (!isConnected) return { error: "Not connected" };
     const level = parseInt(newLevel);
-    if (level < config.tone.min || level > config.tone.max) return { error: "Bass level out of range" };
-    let current = (await getState({ device, key: "bass" }))?.bass || config.tone.initial;
+    if (level < config.tone.min || level > config.tone.max)
+      return { error: "Bass level out of range" };
+    let current =
+      (await getState({ device, key: "bass" }))?.bass || config.tone.initial;
     if (level === current) return { error: "Bass is already " + level };
 
     const increaseBass = level > current;
@@ -219,14 +274,19 @@ export default async ({ setState, getState }) => {
   }
 
   async function resetBass() {
+    if (!isConnected) return { error: "Not connected" };
     await bassDown(Math.abs(config.tone.min) + config.tone.max);
     await setBass(config.tone.initial);
   }
 
   async function trebleUp(steps = 1) {
-    if (steps < 1 || steps > Math.abs(config.tone.min) + config.tone.max) return;
+    if (!isConnected) return { error: "Not connected" };
+    if (steps < 1 || steps > Math.abs(config.tone.min) + config.tone.max)
+      return;
 
-    let current = (await getState({ device, key: "treble" }))?.treble || config.tone.initial;
+    let current =
+      (await getState({ device, key: "treble" }))?.treble ||
+      config.tone.initial;
     try {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
@@ -242,7 +302,12 @@ export default async ({ setState, getState }) => {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
 
-      updateState({ key: "treble", value: current, min: config.tone.min, max: config.tone.max });
+      updateState({
+        key: "treble",
+        value: current,
+        min: config.tone.min,
+        max: config.tone.max,
+      });
     } catch (error) {
       await sleep(config.tone.failDelay);
       await resetTreble();
@@ -250,9 +315,13 @@ export default async ({ setState, getState }) => {
   }
 
   async function trebleDown(steps = 1) {
-    if (steps < 1 || steps > Math.abs(config.tone.min) + config.tone.max) return;
+    if (!isConnected) return { error: "Not connected" };
+    if (steps < 1 || steps > Math.abs(config.tone.min) + config.tone.max)
+      return;
 
-    let current = (await getState({ device, key: "treble" }))?.treble || config.tone.initial;
+    let current =
+      (await getState({ device, key: "treble" }))?.treble ||
+      config.tone.initial;
     try {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
@@ -268,7 +337,12 @@ export default async ({ setState, getState }) => {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
 
-      updateState({ key: "treble", value: current, min: config.tone.min, max: config.tone.max });
+      updateState({
+        key: "treble",
+        value: current,
+        min: config.tone.min,
+        max: config.tone.max,
+      });
     } catch (error) {
       await sleep(config.tone.failDelay);
       await resetTreble();
@@ -276,9 +350,13 @@ export default async ({ setState, getState }) => {
   }
 
   async function setTreble(newLevel) {
+    if (!isConnected) return { error: "Not connected" };
     const level = parseInt(newLevel);
-    if (level < config.tone.min || level > config.tone.max) return { error: "Treble level out of range" };
-    let current = (await getState({ device, key: "treble" }))?.treble || config.tone.initial;
+    if (level < config.tone.min || level > config.tone.max)
+      return { error: "Treble level out of range" };
+    let current =
+      (await getState({ device, key: "treble" }))?.treble ||
+      config.tone.initial;
     if (level === current) return { error: "Treble is already " + level };
 
     const increaseTreble = level > current;
@@ -291,11 +369,13 @@ export default async ({ setState, getState }) => {
   }
 
   async function resetTreble() {
+    if (!isConnected) return { error: "Not connected" };
     await trebleDown(Math.abs(config.tone.min) + config.tone.max);
     await setTreble(config.tone.initial);
   }
 
   async function resetAll() {
+    if (!isConnected) return { error: "Not connected" };
     await resetVolume();
     await resetBass();
     await resetTreble();
