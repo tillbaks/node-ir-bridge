@@ -24,24 +24,27 @@ function getState({ device, key }) {
 }
 
 function setState({ device, key, value }) {
-  state.update(
-    { device, key },
-    { $set: { value } },
-    { upsert: true },
-    (err, numAffected, affectedDocuments, upsert) => {
-      if (err) {
-        console.error("Error (setState):", {
-          err,
-          device,
-          key,
-          value,
-          numAffected,
-          affectedDocuments,
-          upsert,
-        });
+  return new Promise((resolve) => {
+    state.update(
+      { device, key },
+      { $set: { value } },
+      { upsert: true },
+      (err, numAffected, affectedDocuments, upsert) => {
+        if (err) {
+          console.error("Error (setState):", {
+            err,
+            device,
+            key,
+            value,
+            numAffected,
+            affectedDocuments,
+            upsert,
+          });
+        }
+        resolve();
       }
-    }
-  );
+    );
+  });
 }
 
 const deviceList = await Promise.all(
@@ -63,23 +66,20 @@ client.on("connect", async function () {
     await lock.acquireAsync();
     try {
       const [appId, deviceId, command] = topic.split("/");
-      console.debug("Executing:", {
+      const result = await devices[deviceId].commands[command](payload);
+      console.debug(new Date(), "Executing:", {
         appId,
         deviceId,
         command,
         payload: payload.toString(),
+        result,
       });
-      await devices[deviceId].commands[command](payload);
 
       const state = await getState({ device: deviceId });
 
-      client.publish(
-        `${APP_ID}/${deviceId}/state`,
-        JSON.stringify(state),
-        {
-          retain: true,
-        }
-      );
+      client.publish(`${APP_ID}/${deviceId}/state`, JSON.stringify(state), {
+        retain: true,
+      });
     } finally {
       lock.release();
     }

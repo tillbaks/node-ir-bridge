@@ -63,11 +63,11 @@ export default async ({ setState, getState }) => {
 
   async function updateState({ key, value, min, max }) {
     if (min !== undefined && value < min) {
-      setState({ device, key, value: min });
+      await setState({ device, key, value: min });
     } else if (max !== undefined && value > max) {
-      setState({ device, key, value: max });
+      await setState({ device, key, value: max });
     } else {
-      setState({ device, key, value });
+      await setState({ device, key, value });
     }
   }
 
@@ -90,7 +90,8 @@ export default async ({ setState, getState }) => {
     isConnected = false;
   });
 
-  async function setSource(source) {
+  async function setSource(payload) {
+    const source = payload.toString();
     if (!isConnected) return { error: "Not connected" };
     const wanted = config.source.possible.indexOf(source) + 1;
     if (wanted === 0) return { error: "Invalid source provided." };
@@ -112,7 +113,7 @@ export default async ({ setState, getState }) => {
       await sleep(config.source.delay);
       times--;
     }
-    updateState({ key: "source", value: source });
+    await updateState({ key: "source", value: source });
   }
 
   async function volumeUp(steps = 1) {
@@ -129,7 +130,7 @@ export default async ({ setState, getState }) => {
         current++;
       }
     } finally {
-      updateState({
+      await updateState({
         key: "volume",
         value: current,
         min: config.volume.min,
@@ -152,7 +153,7 @@ export default async ({ setState, getState }) => {
         current--;
       }
     } finally {
-      updateState({
+      await updateState({
         key: "volume",
         value: current,
         min: config.volume.min,
@@ -208,7 +209,7 @@ export default async ({ setState, getState }) => {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
 
-      updateState({
+      await updateState({
         key: "bass",
         value: current,
         min: config.tone.min,
@@ -243,7 +244,7 @@ export default async ({ setState, getState }) => {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
 
-      updateState({
+      await updateState({
         key: "bass",
         value: current,
         min: config.tone.min,
@@ -290,6 +291,8 @@ export default async ({ setState, getState }) => {
     try {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
+      await itach.send(buttons.tone);
+      await sleep(config.tone.delay);
 
       for (let i = 0; i < parseInt(steps); i++) {
         await itach.send(buttons.up);
@@ -299,10 +302,8 @@ export default async ({ setState, getState }) => {
 
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
-      await itach.send(buttons.tone);
-      await sleep(config.tone.delay);
 
-      updateState({
+      await updateState({
         key: "treble",
         value: current,
         min: config.tone.min,
@@ -337,7 +338,7 @@ export default async ({ setState, getState }) => {
       await itach.send(buttons.tone);
       await sleep(config.tone.delay);
 
-      updateState({
+      await updateState({
         key: "treble",
         value: current,
         min: config.tone.min,
