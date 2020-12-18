@@ -32,7 +32,7 @@
   "homepage": "https://github.com/tillbaks/node-ir-bridge#readme",
   "dependencies": {
     "await-lock": "^2.1.0",
-    "itach": "^2.0.0",
+    "itach": "^2.0.1",
     "mqtt": "^4.2.6",
     "nedb": "^1.8.0"
   }

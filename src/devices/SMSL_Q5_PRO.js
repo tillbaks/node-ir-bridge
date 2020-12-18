@@ -42,7 +42,7 @@ export default async ({ setState, getState }) => {
     source: {
       possible: ["usb", "opt", "coax", "aux"],
       initial: "usb",
-      delay: 1500, // Delay between button presses (required to avoid unsync during presses and actual state)
+      delay: 2000, // Delay between button presses (required to avoid unsync during presses and actual state)
     },
   };
 
@@ -76,7 +76,7 @@ export default async ({ setState, getState }) => {
   itach.on("connect", async () => {
     isConnected = true;
     console.log("itach connected");
-    //await resetAll();
+    await resetAll();
 
     //await setVolume(3)
     //await itach.send(buttons.down)
@@ -89,6 +89,8 @@ export default async ({ setState, getState }) => {
   itach.on("close", () => {
     isConnected = false;
   });
+
+  itach.on("error", console.error);
 
   async function setSource(payload) {
     const source = payload.toString();
