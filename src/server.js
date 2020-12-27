@@ -49,7 +49,7 @@ function setState({ device, key, value }) {
 
 const deviceList = await Promise.all(
   config.devices.map(async (device) =>
-    (await device).default({ setState, getState })
+    (await device).default({ setState, getState, lock })
   )
 );
 const devices = {};

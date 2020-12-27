@@ -8,7 +8,7 @@
  *  - There seems to be no delay required for changing volume
  *  - Tone change seems to need a small delay to not miss inputs (and in turn get out of sync).
  *  - Source change is slow and needs a lot of delay.
- * 
+ *
  * @TODO: Implement a way to check if broadlink device is actually online (ping? responses from device?)
  *
  * @author tillbaks
@@ -18,7 +18,7 @@ import Broadlink from "kiwicam-broadlinkjs-rm";
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 
-export default async ({ setState, getState }) => {
+export default async ({ setState, getState, lock }) => {
   const device = "SMSL Q5 PRO";
   let isConnected = false;
   const config = {
@@ -1114,11 +1114,12 @@ export default async ({ setState, getState }) => {
   broadlink.discover();
   let broadlinkDevice;
 
-  broadlink.on("deviceReady", (device) => {
+  broadlink.on("deviceReady", async (device) => {
     if (device.mac.toString("hex") === config.broadlink.mac) {
       isConnected = true;
       broadlinkDevice = device;
 
+      await lock.acquireAsync();
       setTimeout(async () => {
         try {
           await resetAll();
@@ -1126,6 +1127,8 @@ export default async ({ setState, getState }) => {
           await setTreble(7);
         } catch (error) {
           console.debug(error);
+        } finally {
+          lock.release();
         }
       }, 5000);
     }
