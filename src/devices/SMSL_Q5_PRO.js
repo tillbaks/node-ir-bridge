@@ -45,8 +45,18 @@ export default async ({ setState, getState, lock }) => {
       delay: 2000, // Delay between button presses (required to avoid unsync during presses and actual state)
     },
     eq: {
-      possible: ["EQ0", "EQ1", "EQ2", "EQ3", "EQ4", "EQ5", "EQ6"],
-      initial: "EQ0",
+      possibleDisplay: ["EQ0", "EQ1", "EQ2", "EQ3", "EQ4", "EQ5", "EQ6", "EQ7"], // This is shown on the display
+      possible: [
+        "Off",
+        "Bass",
+        "Super Bass",
+        "Heavy Rock",
+        "Lite Rock",
+        "Jazz",
+        "Country",
+        "Rap",
+      ],
+      initial: "Off",
       delay: 2000,
     },
   };
@@ -912,7 +922,7 @@ export default async ({ setState, getState, lock }) => {
       0,
       0,
     ]),
-    input: Buffer.from([
+    source: Buffer.from([
       38,
       0,
       80,
@@ -1139,7 +1149,7 @@ export default async ({ setState, getState, lock }) => {
     if (!isConnected) return { error: "Not connected" };
     const wanted = config.source.possible.indexOf(source) + 1;
     if (wanted === 0) return { error: "Invalid source provided." };
-    let currentSource =
+    const currentSource =
       (await getState({ device, key: "source" }))?.source ||
       config.source.initial;
 
@@ -1158,6 +1168,31 @@ export default async ({ setState, getState, lock }) => {
       times--;
     }
     await updateState({ key: "source", value: source });
+  }
+
+  async function setEQ(payload) {
+    const eq = payload.toString();
+    if (!isConnected) return { error: "Not connected" };
+    const wanted = config.eq.possible.indexOf(eq) + 1;
+    if (wanted === 0) return { error: "Invalid eq provided." };
+    const currentEQ =
+      (await getState({ device, key: "eq" }))?.eq || config.eq.initial;
+
+    const current = config.eq.possible.indexOf(currentEQ) + 1;
+
+    let times = 0;
+    if (wanted < current) {
+      times = config.eq.possible.length - current + wanted;
+    } else if (wanted > current) {
+      times = wanted - current;
+    }
+
+    while (times > 0) {
+      broadlinkDevice.sendData(buttons.eq);
+      await sleep(config.eq.delay);
+      times--;
+    }
+    await updateState({ key: "eq", value: eq });
   }
 
   async function volumeUp(steps = 1) {
@@ -1429,6 +1464,14 @@ export default async ({ setState, getState, lock }) => {
       // powerToggle: () => broadlinkDevice.sendData(buttons.power), // Don't use this. No way to reset the state. Better use a smart plug to cut power to amplifier
       nextSource: async () => broadlinkDevice.sendData(buttons.source),
       setSource, // This has the possibility to get out of sync, also no way to reset, can use nextSource above to resync since it does not change the state
+
+      nextEQ: async () => {
+        broadlinkDevice.sendData(buttons.eq);
+        await sleep(config.eq.delay);
+        broadlinkDevice.sendData(buttons.eq);
+        await sleep(config.eq.delay);
+      },
+      setEQ, // This has the possibility to get out of sync, also no way to reset, can use nextEQ above to resync since it does not change the state
 
       volumeUp,
       volumeDown,
