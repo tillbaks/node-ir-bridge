@@ -1194,6 +1194,8 @@ export default async ({ setState, getState, lock }) => {
       await sleep(config.eq.delay);
       times--;
     }
+    broadlinkDevice.sendData(buttons.down);
+    await sleep(config.eq.delay);
     await updateState({ key: "eq", value: eq });
   }
 
