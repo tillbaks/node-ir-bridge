@@ -1187,6 +1187,8 @@ export default async ({ setState, getState, lock }) => {
       times = wanted - current;
     }
 
+    broadlinkDevice.sendData(buttons.eq);
+    await sleep(config.eq.delay);
     while (times > 0) {
       broadlinkDevice.sendData(buttons.eq);
       await sleep(config.eq.delay);
