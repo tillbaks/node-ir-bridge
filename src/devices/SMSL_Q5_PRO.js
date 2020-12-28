@@ -42,7 +42,7 @@ export default async ({ setState, getState, lock }) => {
     source: {
       possible: ["usb", "opt", "coax", "aux"],
       initial: "usb",
-      delay: 2000, // Delay between button presses (required to avoid unsync during presses and actual state)
+      delay: 750, // Delay between button presses (required to avoid unsync during presses and actual state)
     },
     eq: {
       possibleDisplay: ["EQ0", "EQ1", "EQ2", "EQ3", "EQ4", "EQ5", "EQ6", "EQ7"], // This is shown on the display
@@ -57,7 +57,7 @@ export default async ({ setState, getState, lock }) => {
         "Rap",
       ],
       initial: "Off",
-      delay: 2000,
+      delay: 500,
     },
   };
 
