@@ -66,7 +66,7 @@ client.on("connect", async function () {
     await lock.acquireAsync();
     try {
       const [appId, deviceId, command] = topic.split("/");
-      const result = await devices[deviceId].commands[command](payload);
+      const result = await devices[deviceId].commands[command](JSON.parse(payload.toString()));
       console.debug(new Date(), "Executing:", {
         appId,
         deviceId,
